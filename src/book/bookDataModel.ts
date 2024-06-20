@@ -10,7 +10,6 @@ const bookSchema = new mongoose.Schema<Book>(
     author: {
       type: String,
       required: true,
-      unique: true,
     },
     uploadedBy: {
       type: mongoose.Schema.Types.ObjectId,

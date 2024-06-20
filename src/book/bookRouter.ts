@@ -1,7 +1,13 @@
 import express from "express";
-import { createBook } from "./bookController";
+import {
+  createBook,
+  deleteBook,
+  updateBookContent,
+  updateBookMetaData,
+} from "./bookController";
 import multer from "multer";
 import path from "node:path";
+import authenticate from "../middleware/authenticate";
 
 const bookRouter = express.Router();
 const maxSize = 10485760;
@@ -16,8 +22,21 @@ bookRouter.post(
     { name: "coverImage", maxCount: 1 },
     { name: "file", maxCount: 1 },
   ]),
+  authenticate,
   createBook
 );
-// useRouter.post("/login", loginUser);
+bookRouter.patch("/update/meta/:id", authenticate, updateBookMetaData);
+
+bookRouter.patch(
+  "/update/content/:id",
+  upload.fields([
+    { name: "coverImage", maxCount: 1 },
+    { name: "file", maxCount: 1 },
+  ]),
+  authenticate,
+  updateBookContent
+);
+
+bookRouter.delete("/delete/:id", authenticate, deleteBook);
 
 export default bookRouter;

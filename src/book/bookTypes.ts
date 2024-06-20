@@ -1,3 +1,4 @@
+import { Date } from "mongoose";
 import { User } from "../user/userTypes";
 
 export interface Book {
