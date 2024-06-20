@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { signUpValidate } from "../utils/zod";
+import { loginValidate, signUpValidate } from "../utils/zod";
 import createHttpError from "http-errors";
 import User from "./userDataModel";
 import bcrypt from "bcrypt";
@@ -37,7 +37,9 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
       const token = sign({ sub: newUser._id }, config.jwtSecret as string, {
         expiresIn: "7d",
       });
-      res.json({ accessToken: token, message: "User created Successfully" });
+      res
+        .status(201)
+        .json({ accessToken: token, message: "User created Successfully" });
     }
   } catch (error) {
     return next(createHttpError(500, "Error while creating user"));
@@ -46,4 +48,41 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
   // Responce
 };
 
-export { createUser };
+const loginUser = async (req: Request, res: Response, next: NextFunction) => {
+  const { email, password } = req.body;
+  const { success } = loginValidate.safeParse({ email, password });
+  if (!success) {
+    return next(createHttpError(400, "Validation error"));
+  }
+  let user;
+  try {
+    user = await userDataModel.findOne({ email });
+    if (!user) {
+      return next(createHttpError(404, "User not found"));
+    }
+  } catch (error) {
+    return next(createHttpError(500, "Internal server error"));
+  }
+
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    return next(createHttpError(400, "Username and password incorrect"));
+  }
+
+  // create a new access
+  try {
+    if (user) {
+      const token = sign({ sub: user._id }, config.jwtSecret as string, {
+        expiresIn: "7d",
+      });
+      res
+        .status(201)
+        .json({ accessToken: token, message: "User login successfully" });
+    }
+  } catch (error) {
+    return next(createHttpError(500, "Error while logging in"));
+  }
+  res.json({ message: "Done" });
+};
+
+export { createUser, loginUser };
