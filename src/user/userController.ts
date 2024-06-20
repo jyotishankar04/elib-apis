@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { signUpValidate } from "../utils/zod";
 import createHttpError from "http-errors";
 import User from "./userDataModel";
+import bcrypt from "bcrypt";
 
 const createUser = async (req: Request, res: Response, next: NextFunction) => {
   const { name, email, password } = req.body;
@@ -18,8 +19,11 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
     const error = createHttpError(400, "user already exist with this email");
     return next(error);
   }
+  // Hashing the password
+  const hashedPassword = await bcrypt.hash(password, 10);
 
   // Responce
+
   res.json({ message: "User created" });
 };
 
