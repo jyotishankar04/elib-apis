@@ -3,6 +3,9 @@ import { signUpValidate } from "../utils/zod";
 import createHttpError from "http-errors";
 import User from "./userDataModel";
 import bcrypt from "bcrypt";
+import userDataModel from "./userDataModel";
+import { sign } from "jsonwebtoken";
+import { config } from "../config/config";
 
 const createUser = async (req: Request, res: Response, next: NextFunction) => {
   const { name, email, password } = req.body;
@@ -14,17 +17,33 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
     return next(error);
   }
   //check if the user exists
-  const isExists = await User.findOne({ email });
+  const isExists = await userDataModel.findOne({ email });
   if (isExists) {
     const error = createHttpError(400, "user already exist with this email");
     return next(error);
   }
+
   // Hashing the password
-  const hashedPassword = await bcrypt.hash(password, 10);
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = await userDataModel.create({
+      name,
+      email,
+      password: hashedPassword,
+    });
+
+    if (newUser) {
+      const token = sign({ sub: newUser._id }, config.jwtSecret as string, {
+        expiresIn: "7d",
+      });
+      res.json({ accessToken: token, message: "User created Successfully" });
+    }
+  } catch (error) {
+    return next(createHttpError(500, "Error while creating user"));
+  }
 
   // Responce
-
-  res.json({ message: "User created" });
 };
 
 export { createUser };

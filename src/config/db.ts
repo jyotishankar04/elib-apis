@@ -9,9 +9,11 @@ const connectDB = async () => {
     mongoose.connection.on("error", () => {
       //   console.log("Error in connecting to");
     });
-    await mongoose.connect(config.databaseUrl as string);
+    await mongoose.connect(config.databaseUrl as string, {
+      authSource: "admin",
+    });
   } catch (error) {
-    // console.log(error);
+    console.log(error);
     process.exit(1);
   }
 };
