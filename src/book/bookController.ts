@@ -6,10 +6,11 @@ import fs from "node:fs";
 import bookDataModel from "./bookDataModel";
 import { AuthRequest } from "../middleware/authenticate";
 import { config } from "../config/config";
+import { table } from "node:console";
 
 const createBook = async (req: Request, res: Response, next: NextFunction) => {
   const files = req.files as { [filename: string]: Express.Multer.File[] };
-  const { title, genre, author } = req.body;
+  const { title, genre, author, description } = req.body;
 
   const coverImageMineType = files.coverImage[0].mimetype.split("/").at(-1);
   const fileName = files.coverImage[0].filename;
@@ -44,6 +45,7 @@ const createBook = async (req: Request, res: Response, next: NextFunction) => {
       title,
       author,
       genre,
+      description,
       uploadedBy: userId,
       coverImage: uploadResult.secure_url,
       file: bookFileUploadResult.secure_url,
@@ -55,7 +57,6 @@ const createBook = async (req: Request, res: Response, next: NextFunction) => {
 
     res.status(201).json({ id: newBook._id });
   } catch (error) {
-    console.log(error);
     return next(createHttpError(500, "Error while uploading files"));
   } finally {
     try {
@@ -74,7 +75,7 @@ const updateBookMetaData = async (
   res: Response,
   next: NextFunction
 ) => {
-  let { title, genre, author } = req.body;
+  let { title, genre, author, description } = req.body;
   const { id } = req.params;
   const _req = req as AuthRequest;
   const userId = _req.userId;
@@ -97,13 +98,18 @@ const updateBookMetaData = async (
   if (!author) {
     author = isEsists.author;
   }
+
+  if (!description) {
+    description = isEsists.description;
+  }
   try {
-    const newBook = await bookDataModel.updateOne(
+    const newBook = await bookDataModel.findOneAndUpdate(
       { _id: id },
       {
         title,
         author,
         genre,
+        description,
         updatedAt: Date,
       }
     );
@@ -242,4 +248,47 @@ const deleteBook = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 //  todo update content
-export { createBook, updateBookMetaData, updateBookContent, deleteBook };
+
+const listBooks = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const responce = await bookDataModel
+      .find({})
+      .populate("uploadedBy", "_id name"); // Adjust fields to populate
+
+    if (!responce) {
+      return next(createHttpError("404", "Error in fetching data"));
+    }
+    res.status(200).json({
+      data: responce,
+    });
+  } catch (error) {
+    return next(createHttpError("404", "Error in fetching data"));
+  }
+};
+
+const getOneBook = async (req: Request, res: Response, next: NextFunction) => {
+  const { bookId } = req.params;
+  try {
+    const responce = await bookDataModel
+      .find({ _id: bookId })
+      .populate("uploadedBy", "_id name"); // Adjust fields to populate
+
+    if (!responce) {
+      return next(createHttpError("404", "Error in fetching data"));
+    }
+    res.status(200).json({
+      data: responce,
+    });
+  } catch (error) {
+    return next(createHttpError("404", "Error in fetching data"));
+  }
+};
+
+export {
+  createBook,
+  updateBookMetaData,
+  updateBookContent,
+  deleteBook,
+  listBooks,
+  getOneBook,
+};

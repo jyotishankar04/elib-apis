@@ -4,7 +4,7 @@ import { config } from "./config/config";
 import globalErrorHandler from "../globalErrorHandler";
 import useRouter from "./user/userRouter";
 import bookRouter from "./book/bookRouter";
-import cors from "cors";
+import cors, { CorsOptions } from "cors";
 const app = express();
 app.use(express.json());
 
@@ -13,11 +13,11 @@ app.get("/", (req, res) => {
     message: "Welcome to elib",
   });
 });
-app.use(
-  cors({
-    origin: config.frontendDomain,
-  })
-);
+const corsOptions: CorsOptions = {
+  origin: config.frontendDomain,
+};
+app.use(cors(corsOptions));
+
 app.use("/api/v1/users", useRouter);
 app.use("/api/v1/books", bookRouter);
 

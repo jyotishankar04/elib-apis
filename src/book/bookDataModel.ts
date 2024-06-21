@@ -14,6 +14,7 @@ const bookSchema = new mongoose.Schema<Book>(
     uploadedBy: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
+      ref: "User",
     },
     coverImage: {
       type: String,
@@ -30,6 +31,8 @@ const bookSchema = new mongoose.Schema<Book>(
       type: Date,
     },
     genre: { type: String, required: true },
+
+    description: { type: String, required: true },
   },
   { timestamps: true }
 );
