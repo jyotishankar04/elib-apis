@@ -158,7 +158,7 @@ const updateBookContent = async (
 
   try {
     const uploadResult = await cloudinary.uploader.upload(filepath, {
-      filename_override: __filename,
+      filename_override: fileName,
       folder: "book-covers",
       format: coverImageMineType,
     });
@@ -268,6 +268,9 @@ const listBooks = async (req: Request, res: Response, next: NextFunction) => {
 
 const getOneBook = async (req: Request, res: Response, next: NextFunction) => {
   const { bookId } = req.params;
+  const _req = req as AuthRequest;
+  // console.log(_req.userId);
+
   try {
     const responce = await bookDataModel
       .find({ _id: bookId })

@@ -15,8 +15,14 @@ app.get("/", (req, res) => {
 });
 const corsOptions: CorsOptions = {
   origin: config.frontendDomain,
+  methods: "GET,PUT,POST,DELETE,PATCH,OPTIONS",
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
-app.use(cors(corsOptions));
+app.use(
+  cors({
+    origin: "*",
+  })
+);
 
 app.use("/api/v1/users", useRouter);
 app.use("/api/v1/books", bookRouter);

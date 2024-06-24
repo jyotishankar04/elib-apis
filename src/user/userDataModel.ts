@@ -16,6 +16,17 @@ const userSchema = new mongoose.Schema<User>(
       type: String,
       required: true,
     },
+    profileImage: {
+      type: String,
+      default:
+        "https://i.ibb.co/ZdcQQzK/blue-circle-with-white-user-78370-4707.jpg",
+    },
+    bio: { type: String, optional: true },
+    instagramUrl: { type: String, optional: true },
+    linkedinUrl: { type: String, optional: true },
+    twitterUrl: { type: String, optional: true },
+    wishlist: { type: [String], optional: true },
+    dob: { type: String, optional: true },
   },
   { timestamps: true }
 );
