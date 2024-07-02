@@ -17,6 +17,7 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
   const { name, email, password } = req.body;
 
   // Validation
+
   const validation = signUpValidate.safeParse({ name, email, password });
   if (!validation.success) {
     const error = createHttpError(400, "All fields are required");
@@ -43,7 +44,7 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
       const token = sign({ sub: newUser._id }, config.jwtSecret as string, {
         expiresIn: "7d",
       });
-      res
+      return res
         .status(201)
         .json({ accessToken: token, message: "User created Successfully" });
     }
@@ -83,7 +84,7 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
       const token = sign({ sub: user._id }, config.jwtSecret as string, {
         expiresIn: "7d",
       });
-      res
+      return res
         .status(201)
         .json({ accessToken: token, message: "User login successfully" });
     }
@@ -105,12 +106,14 @@ const getMyProfile = async (
     if (!userData) {
       return next(createHttpError(404, "User not found"));
     }
-    const publishedBooks = await bookDataModel.find(
-      {
-        uploadedBy: userId,
-      },
-      "title coverImage file description createdAt updatedAt genre "
-    );
+    const publishedBooks = await bookDataModel
+      .find(
+        {
+          uploadedBy: userId,
+        },
+        "title coverImage file description createdAt updatedAt genre "
+      )
+      .populate("uploadedBy", "_id name");
 
     // console.log(userData);
 
@@ -120,7 +123,6 @@ const getMyProfile = async (
     } else {
       publishedBook = publishedBooks;
     }
-
     const user = {
       name: userData.name,
       email: userData.email,
@@ -133,7 +135,7 @@ const getMyProfile = async (
       wishlist: userData.wishlist,
       publishedBooks: publishedBook,
     };
-    res.status(200).json({
+    return res.status(200).json({
       user,
     });
   } catch (error) {}

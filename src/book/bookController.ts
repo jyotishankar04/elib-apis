@@ -279,7 +279,8 @@ const getOneBook = async (req: Request, res: Response, next: NextFunction) => {
     if (!responce) {
       return next(createHttpError("404", "Error in fetching data"));
     }
-    res.status(200).json({
+
+    return res.status(200).json({
       data: responce,
     });
   } catch (error) {
