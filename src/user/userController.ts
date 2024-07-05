@@ -103,6 +103,63 @@ const getMyProfile = async (
   const userId = _req.userId;
   try {
     const userData = await userDataModel.findById(userId);
+
+    if (!userData) {
+      return next(createHttpError(404, "User not found"));
+    }
+
+    const publishedBooks = await bookDataModel
+      .find(
+        {
+          uploadedBy: userId,
+        },
+        "title coverImage file description createdAt updatedAt genre "
+      )
+      .populate("uploadedBy", "_id name");
+    const wishlistBooks = await bookDataModel
+      .find(
+        {
+          _id: { $in: userData.wishlist },
+        },
+        "title author coverImage file description createdAt updatedAt genre"
+      )
+      .populate("uploadedBy", "_id name");
+
+    let publishedBook: Book[];
+    if (!publishedBooks) {
+      publishedBook = [];
+    } else {
+      publishedBook = publishedBooks;
+    }
+    const user = {
+      name: userData.name,
+      email: userData.email,
+      createdAt: userData.createdAt,
+      profileImage: userData.profileImage,
+      bio: userData.bio,
+      instagramUrl: userData.instagramUrl,
+      linkedinUrl: userData.linkedinUrl,
+      twitterUrl: userData.twitterUrl,
+      wishlist: wishlistBooks,
+      wishlistArray: userData.wishlist,
+      publishedBooks: publishedBook,
+    };
+    return res.status(200).json({
+      user,
+    });
+  } catch (error) {
+    return createHttpError(400, "Error in fetching user");
+  }
+};
+
+const getUserProfile = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const userId = req.params.id;
+  try {
+    const userData = await userDataModel.findById(userId);
     if (!userData) {
       return next(createHttpError(404, "User not found"));
     }
@@ -140,6 +197,7 @@ const getMyProfile = async (
     });
   } catch (error) {}
 };
+
 const changePassword = async (
   req: Request,
   res: Response,
@@ -313,4 +371,5 @@ export {
   profileDataUpdate,
   profilePicUpdate,
   isValidateUser,
+  getUserProfile,
 };

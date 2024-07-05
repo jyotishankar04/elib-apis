@@ -25,7 +25,13 @@ const userSchema = new mongoose.Schema<User>(
     instagramUrl: { type: String, optional: true },
     linkedinUrl: { type: String, optional: true },
     twitterUrl: { type: String, optional: true },
-    wishlist: { type: [String], optional: true },
+    wishlist: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        optional: true,
+        ref: "bookDataModel",
+      },
+    ],
     dob: { type: String, optional: true },
   },
   { timestamps: true }

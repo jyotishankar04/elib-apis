@@ -7,6 +7,7 @@ import bookDataModel from "./bookDataModel";
 import { AuthRequest } from "../middleware/authenticate";
 import { config } from "../config/config";
 import { table } from "node:console";
+import userDataModel from "../user/userDataModel";
 
 const createBook = async (req: Request, res: Response, next: NextFunction) => {
   const files = req.files as { [filename: string]: Express.Multer.File[] };
@@ -288,6 +289,92 @@ const getOneBook = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const addToWishlist = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { bookId } = req.body;
+  const _req = req as AuthRequest;
+  // console.log(_req.userId);
+  const userId = _req.userId;
+  try {
+    const book = await bookDataModel.findById(bookId);
+    if (!book) {
+      return next(createHttpError(404, "Book not found"));
+    }
+
+    const user = await userDataModel.findById(userId);
+    if (user?.wishlist.includes(bookId)) {
+      return next(createHttpError(400, "Book already in wishlist"));
+    }
+    const responce = await userDataModel
+      .findByIdAndUpdate(
+        userId,
+        {
+          $push: { wishlist: bookId },
+        },
+        { new: true }
+      )
+      .exec();
+    return res.status(200).json({
+      message: "Book added to wishlist successfully",
+    });
+  } catch (error) {
+    return next(createHttpError("404", "Error in fetching data"));
+  }
+};
+
+// const getWishlist = async (req: Request, res: Response, next: NextFunction) => {
+//   const _req = req as AuthRequest;
+//   const userId = _req.userId;
+
+//   try {
+//     const bookIds =  // Adjust fields to populate
+
+//     return res.status(200).json({
+//       data: responce,
+//     });
+//   } catch (error) {
+//     return next(createHttpError("404", "Error in fetching data"));
+//   }
+// };
+
+const removeFromWishlist = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const bookId = req.params.bookId;
+  const _req = req as AuthRequest;
+  const userId = _req.userId;
+
+  try {
+    const book = await bookDataModel.findById(bookId);
+    if (!book) {
+      return next(createHttpError(404, "Book not found"));
+    }
+
+    const responce = await userDataModel
+      .findByIdAndUpdate(
+        userId,
+        {
+          $pull: { wishlist: bookId },
+        },
+        { new: true }
+      )
+      .exec();
+    if (!responce) {
+      return next(createHttpError(404, "Error in updating wishlist"));
+    }
+    return res.status(200).json({
+      message: "Book Removed from wishlist",
+    });
+  } catch (error) {
+    return next(createHttpError("404", "Error in fetching data"));
+  }
+};
+
 export {
   createBook,
   updateBookMetaData,
@@ -295,4 +382,7 @@ export {
   deleteBook,
   listBooks,
   getOneBook,
+  addToWishlist,
+  // getWishlist,
+  removeFromWishlist,
 };

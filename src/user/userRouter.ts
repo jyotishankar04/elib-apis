@@ -3,6 +3,7 @@ import {
   changePassword,
   createUser,
   getMyProfile,
+  getUserProfile,
   isValidateUser,
   loginUser,
   profileDataUpdate,
@@ -21,6 +22,8 @@ useRouter.post("/register", createUser);
 useRouter.post("/login", loginUser);
 // useRouter.get("/user/:userId", getUserProfile);
 useRouter.get("/user/profile", authenticate, getMyProfile);
+useRouter.get("/user/:id", authenticate, getUserProfile);
+
 useRouter.patch("/update-password", authenticate, changePassword);
 useRouter.put(
   "/profile/update-image",

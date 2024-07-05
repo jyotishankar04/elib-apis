@@ -1,9 +1,12 @@
 import express from "express";
 import {
+  addToWishlist,
   createBook,
   deleteBook,
   getOneBook,
+  // getWishlist,
   listBooks,
+  removeFromWishlist,
   updateBookContent,
   updateBookMetaData,
 } from "./bookController";
@@ -43,5 +46,11 @@ bookRouter.get("/list", listBooks);
 
 bookRouter.get("/book/:bookId", authenticate, getOneBook);
 bookRouter.delete("/delete/:id", authenticate, deleteBook);
+// bookRouter.post("/book/add-wishlist", authenticate, deleteBook);
+bookRouter.post("/wishlist/add", authenticate, addToWishlist);
+
+// bookRouter.get("/wishlist", authenticate, getWishlist);
+
+bookRouter.delete("/wishlist/remove/:bookId", authenticate, removeFromWishlist);
 
 export default bookRouter;
