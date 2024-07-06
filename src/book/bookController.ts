@@ -56,7 +56,7 @@ const createBook = async (req: Request, res: Response, next: NextFunction) => {
       return next(createHttpError("Error while creating book"));
     }
 
-    res.status(201).json({ id: newBook._id });
+    return res.status(201).json({ id: newBook._id });
   } catch (error) {
     return next(createHttpError(500, "Error while uploading files"));
   } finally {
@@ -67,8 +67,10 @@ const createBook = async (req: Request, res: Response, next: NextFunction) => {
       await fs.promises.unlink(filepath);
     } catch (cleanupError) {
       console.error("Error during cleanup", cleanupError);
+      return;
     }
   }
+  return;
 };
 
 const updateBookMetaData = async (
@@ -124,6 +126,7 @@ const updateBookMetaData = async (
     // console.log(error);
     return next(createHttpError(500, "Error while uploading files"));
   }
+  return;
 };
 
 const updateBookContent = async (
@@ -197,7 +200,7 @@ const updateBookContent = async (
       console.log(error);
     }
 
-    res.status(201).json({ message: "Book updated successfully" });
+    return res.status(201).json({ message: "Book updated successfully" });
   } catch (error) {
     console.log(error);
     return next(createHttpError(500, "Error while uploading files"));
@@ -207,8 +210,10 @@ const updateBookContent = async (
       await fs.promises.unlink(filepath);
     } catch (cleanupError) {
       console.error("Error during cleanup", cleanupError);
+      return;
     }
   }
+  return;
 };
 
 const deleteBook = async (req: Request, res: Response, next: NextFunction) => {
@@ -243,7 +248,7 @@ const deleteBook = async (req: Request, res: Response, next: NextFunction) => {
     return next(createHttpError(501, "Error while deleting book"));
   }
 
-  res.status(200).json({
+  return res.status(200).json({
     message: "Book successfully deleted",
   });
 };
@@ -259,7 +264,7 @@ const listBooks = async (req: Request, res: Response, next: NextFunction) => {
     if (!responce) {
       return next(createHttpError("404", "Error in fetching data"));
     }
-    res.status(200).json({
+    return res.status(200).json({
       data: responce,
     });
   } catch (error) {

@@ -91,7 +91,7 @@ const loginUser = async (req: Request, res: Response, next: NextFunction) => {
   } catch (error) {
     return next(createHttpError(500, "Error while logging in"));
   }
-  res.json({ message: "Done" });
+  return res.json({ message: "Done" });
 };
 
 const getMyProfile = async (
@@ -220,7 +220,7 @@ const changePassword = async (
     await userDataModel.findByIdAndUpdate(userId, {
       password: hashedPassword,
     });
-    res.status(200).json({
+    return res.status(200).json({
       message: "Password changed successfully",
     });
   } catch (error) {
