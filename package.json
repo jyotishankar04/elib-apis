@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "dev": "nodemon server.ts"
+    "dev": "nodemon server.ts",
+    "docker:publish": "sudo docker build -t devsuvamjyoti/elib-backend:v2 --platform linux/amd64 . && sudo docker push devsuvamjyoti/elib-backend:v2"
   },
   "author": "suvam",
   "license": "ISC",
