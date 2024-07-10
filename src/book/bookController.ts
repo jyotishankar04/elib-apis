@@ -247,6 +247,12 @@ const deleteBook = async (req: Request, res: Response, next: NextFunction) => {
   } catch (error) {
     return next(createHttpError(501, "Error while deleting book"));
   }
+  const deleteFromWishlist = await userDataModel.updateMany(
+    {
+      wishlist: { $in: id },
+    },
+    { $pull: { wishlist: id } }
+  );
 
   return res.status(200).json({
     message: "Book successfully deleted",
